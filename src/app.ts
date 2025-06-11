@@ -1,4 +1,4 @@
-import express, {NextFunction} from 'express';
+import express, {NextFunction,Response,Request} from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from "./config/db.config";
@@ -40,7 +40,7 @@ app.use(
     }),
 );
 
-app.use((req,res,next)=> {
+app.use((req:Request, res:Response, next:NextFunction)=> {
     console.log(`[REQUEST] ${req.method} ${req.url}`)
 
     next();

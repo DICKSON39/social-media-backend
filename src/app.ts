@@ -23,11 +23,13 @@ app.use(express.json());
 app.use(morgan("dev"))
 
 
-const allowedOrigins = ["https://campus-connect-g7i4bbxpn-dickson-ndumias-projects.vercel.app/"];
+const allowedOrigins = ["https://campus-connect-g7i4bbxpn-dickson-ndumias-projects.vercel.app",
+    "http://localhost:4200",];
 
 app.use(
     cors({
         origin: (origin: string | undefined, callback: Function) => {
+            console.log("🌍 Incoming Origin:", origin);
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
             } else {

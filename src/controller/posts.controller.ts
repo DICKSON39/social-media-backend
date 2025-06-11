@@ -418,10 +418,10 @@ export const updatePost = asyncHandler(async (req: UserRequest, res: Response, n
         return res.status(400).json({ message: "Title and content are required for update." });
     }
 
-    // Get post to check permissions
+    // Fetch the current post for permission check AND current image_url
     const { data: post, error: fetchError } = await supabase
         .from("posts")
-        .select("user_id")
+        .select("user_id, image_url")
         .eq("id", postId)
         .single();
 
@@ -436,9 +436,10 @@ export const updatePost = asyncHandler(async (req: UserRequest, res: Response, n
         return res.status(403).json({ message: "Forbidden: You are not authorized to update this post." });
     }
 
-    let image_url: string | null = req.body.image_url || null;
+// Initialize image_url with existing one from DB
+    let image_url: string | null = post.image_url;
 
-    // If new file uploaded, store it in Supabase
+// If a new file is uploaded, replace the image_url
     if (req.file) {
         const fileExt = req.file.originalname.split(".").pop();
         const fileName = `${uuid()}.${fileExt}`;
@@ -459,6 +460,7 @@ export const updatePost = asyncHandler(async (req: UserRequest, res: Response, n
 
         image_url = publicUrlData.publicUrl;
     }
+
 
     // Update the post
     const { data: updatedPost, error: updateError } = await supabase

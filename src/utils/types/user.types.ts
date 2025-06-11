@@ -14,6 +14,7 @@ export interface User {
     userId:number;
     roleId:number;
     role_name:string;
+
 }
 
 export interface UserRequest extends Request {

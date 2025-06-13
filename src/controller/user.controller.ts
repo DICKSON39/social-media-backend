@@ -59,25 +59,37 @@ export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
     const countQueryParams = searchTerm ? [queryParams[queryParams.length - 1]] : [];
 
     const countResult = await pool.query(
-        `SELECT COUNT(id) FROM public.person ${whereClause}`,
-        countQueryParams
+        `SELECT COUNT(p.id) FROM public.person p
+                                     LEFT JOIN public.roles r ON p.role_id = r.id
+            ${whereClause}`,
+        searchTerm ? [queryParams[queryParams.length - 1]] : []
     );
+
+
 
     const totalItems = parseInt(countResult.rows[0].count, 10);
     const totalPages = Math.ceil(totalItems / pageSize);
 
     const result = await pool.query(
         `
-        SELECT 
-            id, first_name, last_name, email, role_id
-        FROM 
-            public.person
-        ${whereClause}
-        ORDER BY id ASC
-        LIMIT $1 OFFSET $2;
+            SELECT
+                p.id,
+                p.first_name,
+                p.last_name,
+                p.email,
+                p.role_id,
+                r.role_name
+            FROM
+                public.person p
+                    LEFT JOIN
+                public.roles r ON p.role_id = r.id
+                    ${whereClause}
+            ORDER BY p.id ASC
+            LIMIT $1 OFFSET $2;
         `,
         queryParams
     );
+
 
     res.status(200).json({
         items: result.rows.map((row) => ({
@@ -86,6 +98,7 @@ export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
             lastName: row.last_name,
             email: row.email,
             roleId: row.role_id,
+            role_name: row.role_name || 'Unknown',
         })),
         totalItems,
         currentPage: page,

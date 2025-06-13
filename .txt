@@ -6,3 +6,68 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+<ng-container *ngIf="editingPostId === post.id; else displayPostContent">
+          <form
+            class="edit-post-form-container"
+            [formGroup]="postEditForm"
+            (ngSubmit)="saveEditedPost()"
+            enctype="multipart/form-data"
+          >
+            <div class="form-group">
+              <label for="editPostTitle" class="sr-only">Post Title</label>
+              <input
+                id="editPostTitle"
+                type="text"
+                formControlName="title"
+                placeholder="Edit title..."
+              />
+              <div *ngIf="hasPostEditError('title', 'required')" class="validation-error">
+                Title is required.
+              </div>
+              <div *ngIf="hasPostEditError('title', 'minlength')" class="validation-error">
+                Title min 3 chars.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editPostContent" class="sr-only">Post Content</label>
+              <textarea
+                id="editPostContent"
+                formControlName="content"
+                placeholder="Edit content..."
+                rows="5"
+              ></textarea>
+              <div *ngIf="hasPostEditError('content', 'required')" class="validation-error">
+                Content is required.
+              </div>
+              <div *ngIf="hasPostEditError('content', 'minlength')" class="validation-error">
+                Content min 10 chars.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editPostImage">Update Image</label>
+              <input
+                id="editPostImage"
+                type="file"
+                (change)="onImageSelected($event)"
+                accept="image/*"
+              />
+              <div class="current-image-preview" *ngIf="post.image_url">
+                <p>Current Image:</p>
+                <img [src]="post.image_url" alt="Current Post Image" class="preview-img" />
+              </div>
+            </div>
+
+            <button type="submit" [disabled]="postEditForm.invalid || isSavingPost">
+              <span *ngIf="!isSavingPost">Save</span>
+              <span *ngIf="isSavingPost" class="spinner-container">
+                <div class="spinner"></div> Saving...
+              </span>
+            </button>
+            <button type="button" (click)="cancelEditPost()" class="btn-cancel" [disabled]="isSavingPost">
+              Cancel
+            </button>
+          </form>
+        </ng-container>

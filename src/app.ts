@@ -23,8 +23,8 @@ app.use(express.json());
 app.use(morgan("dev"))
 
 
-const allowedOrigins = ["https://campus-connect-g7i4bbxpn-dickson-ndumias-projects.vercel.app",
-    "http://localhost:4200","https://campus-connect-mu-two.vercel.app/"];
+const allowedOrigins = ["https://campus-connect-mu-two.vercel.app",
+    "http://localhost:4200","https://campus-connect-mu-two.vercel.app"];
 
 app.use(
     cors({

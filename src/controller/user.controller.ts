@@ -1,10 +1,103 @@
 import {asyncHandler} from "../middleware/handlers/asyncHandler";
 import {UserRequest} from "../utils/types/user.types";
-import {NextFunction,Response} from "express";
+import {NextFunction,Response,Request} from "express";
 import pool from "../config/db.config";
 
 
-export const getUsers= asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
+export interface User {
+    id:number;
+    first_name:string;
+    last_name:string;
+    email:string;
+    password:string;
+    gender:string;
+    country_code:number;
+    date_of_birth:Date;
+    role_id:number;
+    userId:number;
+    roleId:number;
+    role_name:string;
+
+
+}
+
+interface Usermain extends Request {
+    query: {
+        page?: string;
+        pageSize?: string;
+        searchTerm?: string;
+    };
+    user?: User;
+}
+
+
+
+export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
+
+
+    const page = parseInt(req.query.page || "1");
+    const pageSize = parseInt(req.query.pageSize || "100");
+    const searchTerm = req.query.searchTerm?.toLowerCase() || "";
+
+    const offset = (page - 1) * pageSize;
+
+    let whereClause = "";
+    const queryParams: any[] = [pageSize, offset];
+    let paramIndex = 3;
+
+    if (searchTerm) {
+        whereClause = `
+            WHERE
+                LOWER(first_name) LIKE $${paramIndex} OR
+                LOWER(last_name) LIKE $${paramIndex} OR
+                LOWER(email) LIKE $${paramIndex}
+        `;
+        queryParams.push(`%${searchTerm}%`);
+    }
+
+    // COUNT query params
+    const countQueryParams = searchTerm ? [queryParams[queryParams.length - 1]] : [];
+
+    const countResult = await pool.query(
+        `SELECT COUNT(id) FROM public.person ${whereClause}`,
+        countQueryParams
+    );
+
+    const totalItems = parseInt(countResult.rows[0].count, 10);
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    const result = await pool.query(
+        `
+        SELECT 
+            id, first_name, last_name, email, role_id
+        FROM 
+            public.person
+        ${whereClause}
+        ORDER BY id ASC
+        LIMIT $1 OFFSET $2;
+        `,
+        queryParams
+    );
+
+    res.status(200).json({
+        items: result.rows.map((row) => ({
+            id: row.id,
+            firstName: row.first_name,
+            lastName: row.last_name,
+            email: row.email,
+            roleId: row.role_id,
+        })),
+        totalItems,
+        currentPage: page,
+        pageSize,
+        totalPages,
+    });
+});
+
+
+
+
+export const getUsers2= asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
     const userId = req.user?.id;
     const roleId = req.user?.role_id;
 

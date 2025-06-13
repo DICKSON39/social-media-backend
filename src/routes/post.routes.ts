@@ -14,12 +14,13 @@ import {upload} from "../middleware/upload/upload";
 
 const router = express.Router();
 
-router.post('/post',protect,AdminOrUser,upload.single("image"),createPost)
+router.post('/post',protect,AdminOrUser,upload.single("image video"),createPost)
 router.delete("/posts/:postId", protect, deletePost);
 router.get('/posts',getAllPosts);
 router.get('/posts-by-user',protect,getAllPostByUser)
-router.get('/my-posts',protect,getMyPost)
-router.put('/posts/:id',protect,upload.single("image"),updatePost)
+router.get('/my-posts',protect,getMyPost);
+router.put('/posts/:id',protect,upload.single("image,video"),updatePost);
+
 
 
 export default router;

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import {generatetoken} from "../utils/helpers/generateToken";
 
 
-//Registering users to this
+
 
 export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const client = await pool.connect();

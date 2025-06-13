@@ -29,9 +29,6 @@ interface Usermain extends Request {
     };
     user?: User;
 }
-
-
-
 export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
 
 
@@ -286,6 +283,7 @@ export const getUserById = asyncHandler(async (req: UserRequest, res: Response) 
       p.first_name, 
       p.last_name, 
       p.email, 
+      p.country_code,
       p.role_id, 
       r.role_name
     FROM 
@@ -312,6 +310,7 @@ export const getUserById = asyncHandler(async (req: UserRequest, res: Response) 
         email: user.email,
         role_id: user.role_id,
         role_name: user.role_name || "Unknown",
+        country_code:user.country_code,
     });
 })
 

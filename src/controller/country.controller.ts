@@ -59,7 +59,6 @@ export const addCountry = asyncHandler(async (req:UserRequest,res:Response,next:
     }
 
 });
-
 export  const getAvailableCountry = asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
     const userId = req.user?.id;
 
@@ -87,7 +86,6 @@ export  const getAvailableCountry = asyncHandler(async (req:UserRequest,res:Resp
     }
 
 });
-
 export const deleteMyCountry = asyncHandler(async (req:UserRequest,res:Response,nex:NextFunction)=> {
     const userId = req.user?.id;
     const roleId = req.user?.role_id;
@@ -130,7 +128,6 @@ export const deleteMyCountry = asyncHandler(async (req:UserRequest,res:Response,
     }
 
 });
-
 export const updateCountry = asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
     const userId = req.user?.id;
     const roleId = req.user?.role_id;

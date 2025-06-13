@@ -106,58 +106,6 @@ export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
         totalPages,
     });
 });
-
-
-
-
-export const getUsers2= asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
-    const userId = req.user?.id;
-    const roleId = req.user?.role_id;
-
-    if (!userId || !roleId) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
-    }
-
-
-    try {
-        //Only Admin can get this info;
-        if ( roleId !== 1) {
-            res.status(403).json({ message: "Unauthorized to update this comment" });
-            return;
-        }
-
-        const result = await pool.query(`
-    SELECT 
-     person.id,
-        person.first_name,
-        person.last_name,
-        person.email,
-        person.country_code
-        
-        FROM person JOIN public.country c on c.country_code = person.country_code
-    
-    
-    
-    
-     `);
-
-        const finalResult = result.rows;
-
-        res.status(200).json({
-            message: "Users Fetched SuccessFully",
-            users: finalResult,
-        })
-        
-    } catch (error) {
-        console.error("Error Occurred sir",error);
-        res.status(500).json({
-            message: "Internal Server Error",
-        })
-        
-    }
-});
-
 export const deleteUser = asyncHandler(async (req:UserRequest,res:Response,next:NextFunction)=> {
     const adminId = req.user?.id;
     const roleId = req.user?.role_id;
@@ -213,7 +161,6 @@ export const deleteUser = asyncHandler(async (req:UserRequest,res:Response,next:
         })
     }
 })
-
 export const updateUser = asyncHandler(async (req: UserRequest, res: Response, next: NextFunction) => {
     const client = await pool.connect();
     const loggedInUserId = req.user?.id;
@@ -313,4 +260,60 @@ export const updateUser = asyncHandler(async (req: UserRequest, res: Response, n
 
 
 });
+export const getUserById = asyncHandler(async (req: UserRequest, res: Response) => {
+    const userId = parseInt(req.params.id);
+    if (isNaN(userId)) {
+        res.status(400).json({ message: "Invalid user ID" });
+        return;
+    }
+    const loggedInUserId = req.user?.id;
+    const loggedInUserRole = req.user?.role_id;
+
+    if (!loggedInUserId || !loggedInUserRole) {
+        res.status(401).json({ message: "Unauthorized" });
+        return
+    }
+
+
+    if (isNaN(userId)) {
+        res.status(400).json({ message: "Invalid user ID" });
+        return;
+    }
+
+    const query = `
+    SELECT 
+      p.id, 
+      p.first_name, 
+      p.last_name, 
+      p.email, 
+      p.role_id, 
+      r.role_name
+    FROM 
+      public.person p
+    LEFT JOIN 
+      public.roles r ON p.role_id = r.id
+    WHERE 
+      p.id = $1;
+  `;
+
+    const result = await pool.query(query, [userId]);
+
+    if (result.rows.length === 0) {
+        res.status(404).json({ message: "User not found" });
+        return;
+    }
+
+    const user = result.rows[0];
+
+    res.status(200).json({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role_id: user.role_id,
+        role_name: user.role_name || "Unknown",
+    });
+})
+
+
 

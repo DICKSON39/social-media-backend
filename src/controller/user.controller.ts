@@ -29,6 +29,7 @@ interface Usermain extends Request {
     };
     user?: User;
 }
+
 export const getUsers = asyncHandler(async (req: Usermain, res: Response) => {
 
 
@@ -117,9 +118,7 @@ export const deleteUser = asyncHandler(async (req:UserRequest,res:Response,next:
         res.status(401).json({ message: "Invalid User Id" });
         return;
     }
-    // console.log(userId);
-    // console.log(roleId);
-    // console.log(adminId);
+
 
 
 

@@ -5,10 +5,6 @@ import pool from "../config/db.config";
 import { v4 as uuid } from "uuid";
 import { supabase } from "../utils/supabaseClient";
 
-
-
-
-// Assuming your existing createPost endpoint in Node.js
 export const createPost = asyncHandler(async (req: UserRequest, res: Response, next: NextFunction) => {
     const { title, content } = req.body;
     const userId = req.user?.id;
@@ -78,10 +74,7 @@ export const deletePost = asyncHandler(async (req: UserRequest, res: Response, n
         const roleId = req.user?.role_id;
 
 
-    // console.log("Backend Delete Post Request:"); // <--- ADD THIS
-    // console.log("  Authenticated User ID:", userId); // <--- ADD THIS
-    // console.log("  Authenticated User Role ID:", roleId); // <--- ADD THIS
-    // console.log("  Received Post ID from params:", postId); // <--- ADD THIS
+
 
         if (!userId) {
              res.status(400).json({ message: "User not found" });
@@ -94,7 +87,7 @@ export const deletePost = asyncHandler(async (req: UserRequest, res: Response, n
         }
 
     try {
-        // console.log(`  Querying for post with ID: ${postId} in database.`);
+
         const postQueryResult = await pool.query(
             `SELECT user_id FROM posts WHERE id = $1`,
             [postId]
@@ -184,7 +177,7 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response, next
             FROM comments c
             JOIN person u ON c.user_id = u.id
             WHERE c.post_id = ANY($1::int[])
-            ORDER BY c.created_at ASC
+            ORDER BY c.created_at DESC
             `,
             [postIds]
         );
@@ -234,7 +227,6 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response, next
         });
     }
 });
-
 
 export const getAllPostByUser = asyncHandler(async (req: UserRequest, res: Response, next: NextFunction) => {
     const userId = req.user?.id;
@@ -340,10 +332,11 @@ export const getMyPost = asyncHandler(async (req: UserRequest, res: Response, ne
                     u.email AS commenter_email
                 FROM comments c
                          JOIN person u ON c.user_id = u.id
-                WHERE c.post_id = ANY($1::int[]) -- Fetch comments for all relevant post IDs
-                ORDER BY c.created_at ASC 
+                WHERE c.post_id = ANY($1::int[]) 
+                ORDER BY c.created_at DESC
+                
             `,
-            [postIds] // Pass the array of post IDs
+            [postIds]
         );
 
         const comments = TheCommentsResult.rows;
@@ -399,7 +392,6 @@ export const getMyPost = asyncHandler(async (req: UserRequest, res: Response, ne
 
 });
 
-// Assuming your existing updatePost endpoint in Node.js
 export const updatePost = asyncHandler(async (req: UserRequest, res: Response, next: NextFunction) => {
     const { title, content } = req.body;
     const { id: postId } = req.params;
@@ -485,6 +477,4 @@ export const updatePost = asyncHandler(async (req: UserRequest, res: Response, n
         post: updatedPost,
     });
 });
-
-
 

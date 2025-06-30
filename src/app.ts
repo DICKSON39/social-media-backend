@@ -62,19 +62,7 @@ app.use('/api/country',countryRoutes);
 
 const port = process.env.PORT;
 
-const testDB = async () => {
-    try {
-        const client = await pool.connect();
-        const result = await client.query('SELECT NOW()');
-        console.log('Database connected! Time:',);
-        client.release(); // very important to release the client
-    } catch (err) {
-        console.error('Database connection failed:', err);
-    }
 
-}
-
-testDB();
 
 app.get('/', (req, res) => {
     console.log("Hello world")
@@ -85,6 +73,8 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
+
+
 
 
 

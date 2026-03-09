@@ -162,25 +162,7 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response, next
         // 2. Get all comments linked to post IDs
         const postIds = posts.map(post => post.post_id);
 
-        const { rows: comments } = await pool.query(
-            `
-            SELECT
-                c.id AS comment_id,
-                c.post_id,
-                c.content AS comment_content,
-                c.created_at AS comment_created_at,
-
-                u.id AS commenter_id,
-                u.first_name AS commenter_first_name,
-                u.last_name AS commenter_last_name,
-                u.email AS commenter_email
-            FROM comments c
-            JOIN person u ON c.user_id = u.id
-            WHERE c.post_id = ANY($1::int[])
-            ORDER BY c.created_at DESC
-            `,
-            [postIds]
-        );
+      z
 
         // 3. Format post & attach comments
         const postsWithComments = posts.map(post => {

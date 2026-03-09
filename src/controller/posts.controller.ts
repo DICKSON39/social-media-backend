@@ -413,27 +413,40 @@ export const updatePost = asyncHandler(async (req: UserRequest, res: Response, n
 // Initialize image_url with existing one from DB
     let image_url: string | null = post.image_url;
 
-// If a new file is uploaded, replace the image_url
-    if (req.file) {
-        const fileExt = req.file.originalname.split(".").pop();
-        const fileName = `${uuid()}.${fileExt}`;
-        const filePath = `posts/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-            .from("myfiles")
-            .upload(filePath, req.file.buffer, {
-                contentType: req.file.mimetype,
-                upsert: true,
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage
-            .from("myfiles")
-            .getPublicUrl(filePath);
-
-        image_url = publicUrlData.publicUrl;
+if (req.file) {
+    // 1. If an old image exists, extract the path and delete it
+    if (post.image_url) {
+        const oldPath = post.image_url.split('/').pop(); // Simplistic way to get fileName
+        if (oldPath) {
+            await supabase.storage
+                .from("myfiles")
+                .remove([`posts/${oldPath}`]);
+        }
     }
+
+    // 2. Proceed with new upload
+    const fileExt = req.file.originalname.split(".").pop();
+    const fileName = `${uuid()}.${fileExt}`;
+    const filePath = `posts/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from("myfiles")
+        .upload(filePath, req.file.buffer, {
+            contentType: req.file.mimetype,
+            upsert: true,
+        });
+
+    if (uploadError) {
+        return res.status(500).json({ message: "File upload failed", error: uploadError.message });
+    }
+
+    const { data: publicUrlData } = supabase.storage
+        .from("myfiles")
+        .getPublicUrl(filePath);
+
+    image_url = publicUrlData.publicUrl;
+}
 
 
     // Update the post

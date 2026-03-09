@@ -35,6 +35,8 @@ export const AdminOrUser = (
         return next();
     }
 
+    console.log(`Access Denied. User ID: ${req.user?.id}, Role in DB: "${req.user?.role_name}"`);
+
     res
         .status(403)
         .json({ message: "You are not authorized to Do This" });
